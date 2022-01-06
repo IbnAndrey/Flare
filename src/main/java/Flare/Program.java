@@ -1,8 +1,14 @@
 package Flare;
+import Flare.Modules.ImportFromExcel;
+import java.io.IOException;
 
-import javax.swing.*;
+
 
 public class Program {
 
+    public static void main(String[] args) throws IOException {
+        ImportFromExcel.GetExcelData();
+
+    }
 
 }
