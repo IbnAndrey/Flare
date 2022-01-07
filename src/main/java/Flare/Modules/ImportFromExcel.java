@@ -24,9 +24,9 @@ public class ImportFromExcel {
         style.setFont(font);
         return style;
     }
-    public static void GetExcelData() throws IOException {
+    public static void GetExcelData(File ExcelFile) throws IOException {
         // Read XSL file
-        FileInputStream inputStream = new FileInputStream(new File("D:/Projects/IdeaProjects/Flare/Samples.xls"));
+        FileInputStream inputStream = new FileInputStream(ExcelFile);
 
         // Get the workbook instance for XLS file
         HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
