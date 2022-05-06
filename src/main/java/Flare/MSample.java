@@ -1,19 +1,10 @@
 package Flare;
+import java.io.Serializable;
 
-public class MSample {
-    private String empNo;
-    private String empName;
+import lombok.*;
 
-    private Double salary;
-    private int grade;
-    private Double bonus;
-
-    public MSample(String empNo, String empName,//
-                    Double salary, int grade, Double bonus) {
-        this.empNo = empNo;
-        this.empName = empName;
-        this.salary = salary;
-        this.grade = grade;
-        this.bonus = bonus;
-    }
+@Data
+@Builder
+public class MSample implements Serializable {
+    private String sampleNo,bloom, quality,cod_1,cod_2,cod_3,cod_4,C,Si,Mn,P,S,Cr,Ni,Mo,Cu,Al,V,W,Ti;
 }
