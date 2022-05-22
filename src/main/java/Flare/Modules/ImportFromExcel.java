@@ -1,8 +1,10 @@
 package Flare.Modules;
 
-import javax.swing.*;
+
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Iterator;
 
@@ -26,12 +28,13 @@ public class ImportFromExcel {
         return style;
     }
     public static List<MSample> GetExcelData(File ExcelFile) throws IOException {
-        String[] checkList = new String[]{"Sample_No", "Quality", "Bloom", "Cod_1", "Cod_2", "Cod_3", "Cod_4","Kristal","Product","Seria", "C","Si","Mn","P","S","Cr","Ni","Mo","Cu","Al","V","W","Ti"};
+        String[] checkList = new String[]{"Date","Time","Sample_NO", "Quality","Program", "Bloom", "Cod_1", "Cod_2", "Cod_3", "Cod_4","Kristal","Seria","Product", "C","Si","Mn","P","S","Cr","Ni","Mo","Cu","Al","As","V","W","Ti"};
         String quality,bloom,cod_1,cod_2,cod_3,cod_4;
-        String[] data = new String[20];
+        String[] data = new String[24];
         boolean checkHeaderRow = true;
         List<MSample> sampleList = new ArrayList<>();
-
+        SimpleDateFormat dt = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat dt1 = new SimpleDateFormat("HH:mm:ss");
         // Read XLS file
         FileInputStream inputStream = new FileInputStream(ExcelFile);
 
@@ -69,9 +72,10 @@ public class ImportFromExcel {
                     CellType cellType = cell.getCellTypeEnum();*/
 
                 Cell cell = sheet.getRow(row.getRowNum()).getCell(0);
-                data[0] = cell.getStringCellValue(); //
-
-                    for(int i = 0; i<=6;++i)
+                data[0] = dt.format(cell.getDateCellValue()); //
+                cell = sheet.getRow(row.getRowNum()).getCell(1);
+                data[1] = dt1.format(cell.getDateCellValue());
+                    for(int i = 2; i<=3;++i)
                     {
                         cell = sheet.getRow(row.getRowNum()).getCell(i);
                         if(cell == null )
@@ -80,43 +84,66 @@ public class ImportFromExcel {
                             data[i] = cell.getStringCellValue();
                         else data[i] = String.valueOf(cell.getNumericCellValue());
                     }
-
-                for(int i = 10; i<=22;++i)
+                for(int i = 5; i<=9;++i)
                 {
                     cell = sheet.getRow(row.getRowNum()).getCell(i);
+                    if(cell == null )
+                        data[i-1] = null;  //"sampleNo" "Quality", "Bloom", "Cod_1", "Cod_2", "Cod_3", "Cod_4"
+                    else if(cell.getCellTypeEnum().name()== "STRING")
+                        data[i-1] = cell.getStringCellValue();
+                    else data[i-1] = String.valueOf(cell.getNumericCellValue());
+                }
+                cell = sheet.getRow(row.getRowNum()).getCell(11);
+                if(cell != null)
+                data[9] = cell.getStringCellValue();
+                else data[9] = null;
 
-                    if(cell.getCellTypeEnum().name()== "STRING")
+                for(int i = 13; i<=26;++i)
+                {
+                    cell = sheet.getRow(row.getRowNum()).getCell(i);
+                    if(cell==null) data[i-3] = null;
+                    else if(cell.getCellTypeEnum().name()== "STRING")
                     data[i-3] = cell.getStringCellValue();  //
                     else data[i-3] = String.valueOf(cell.getNumericCellValue());
                 }
                 System.out.println("");
-                if(data[2]!=null)//Убираем .0 после номера блюма
+                if(data[4]!=null)//Убираем .0 после номера блюма
                 {
-                StringBuffer buffer = new StringBuffer(data[2]);
-                buffer.delete(data[2].length()-2,data[2].length());
-                data[2]= buffer.toString();
+                StringBuffer buffer = new StringBuffer(data[4]);
+                buffer.delete(data[4].length()-2,data[4].length());
+                data[4]= buffer.toString();
+                }
+                int bloomCount = 0;
+                String[] bloomDivide;
+                for(int i = 0; i<4;++i) {
+                    try {
+                        bloomDivide = data[i+5].split("\\*");
+                        bloomCount += Integer.parseInt(bloomDivide[0]);
+                    } catch (Exception e) {
+                    }
                 }
                 MSample sample = MSample.builder()
-                        .sampleNo(data[0])
-                        .quality(data[1])
-                        .bloom(data[2])
-                        .cod_1(data[3])
-                        .cod_2(data[4])
-                        .cod_3(data[5])
-                        .cod_4(data[6])
-                        .C(data[7])
-                        .Si(data[8])
-                        .Mn(data[9])
-                        .P(data[10])
-                        .S(data[11])
-                        .Cr(data[12])
-                        .Ni(data[13])
-                        .Mo(data[14])
-                        .Cu(data[15])
-                        .Al(data[16])
-                        .V(data[17])
-                        .W(data[18])
-                        .Ti(data[19])
+                        .date(data[0])
+                        .time(data[1])
+                        .sampleNo(data[2])
+                        .quality(data[3])
+                        .bloom(data[4])
+                        .codes(String.valueOf(bloomCount))
+                        .seria(data[9])
+                        .C(data[10])
+                        .Si(data[11])
+                        .Mn(data[12])
+                        .P(data[13])
+                        .S(data[14])
+                        .Cr(data[15])
+                        .Ni(data[16])
+                        .Mo(data[17])
+                        .Cu(data[18])
+                        .Al(data[19])
+                        .As(data[20])
+                        .V(data[21])
+                        .W(data[22])
+                        .Ti(data[23])
                         .build();
                 sampleList.add(sample);
             }

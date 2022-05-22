@@ -7,36 +7,32 @@ import java.util.ArrayList;
 import java.util.List;
 import Flare.Modules.ImportFromExcel;
 
+import static Flare.Modules.ComplexSearch.searchByName;
+
 public class Controller {
-    private final String[] header = new String[]{"Номер образца", "Марка стали", "Блюм","Код 1","Код 2","Код 3","Код 4", "Кол-во блюмов", "C","Si","Mn","P","S","Cr","Ni","Mo","Cu","Al","V","W","Ti"};
+    private final String[] header = new String[]{"Дата","Время","Номер образца", "Марка стали", "Блюм", "Кол-во блюмов","Серия", "C","Si","Mn","P","S","Cr","Ni","Mo","Cu","Al","As","V","W","Ti"};
     private JTable output_table;
     private DefaultTableModel output_table_inner = new DefaultTableModel(header, 0);
     private List<MSample> tableList = new ArrayList<>();
+    public boolean saveBlocker = false;
     public JTable createOutputTable() {
-        print();
+        print(pullData());
         output_table = new JTable(output_table_inner);
         output_table.putClientProperty("terminateEditOnFocusLost", true);
         return output_table;
     }
 
-    public void print() {
+    public void print(List<MSample> tableList) {
         output_table_inner.setRowCount(0);
-        tableList = pullData();
         tableList.forEach(sample ->
         {
+            String date = sample.getDate();
+            String time = sample.getTime();
             String sample_No = sample.getSampleNo();
             String quality = sample.getQuality();
             String bloom = sample.getBloom();
-            String codes[] = new String[]{sample.getCod_1(),sample.getCod_2(),sample.getCod_3(),sample.getCod_4()};
-            int bloomCount = 0;
-            String[] bloomDivide;
-            for(int i = 0; i<4;++i) {
-                try {
-                    bloomDivide = codes[i].split("\\*");
-                    bloomCount += Integer.parseInt(bloomDivide[0]);
-                } catch (Exception e) {
-                }
-            }
+            String bloomCount = sample.getCodes();
+            String seria = sample.getSeria();
             String C = sample.getC();
             String Si = sample.getSi();
             String Mn = sample.getMn();
@@ -47,10 +43,11 @@ public class Controller {
             String Mo = sample.getMo();
             String Cu = sample.getCu();
             String Al = sample.getAl();
+            String As = sample.getAs();
             String V = sample.getV();
             String W = sample.getW();
             String Ti = sample.getTi();
-            Object[] rowData = {sample_No,quality,bloom,codes[0],codes[1],codes[2],codes[3],bloomCount,C,Si,Mn,P,S,Cr,Ni,Mo,Cu,Al,V,W,Ti};
+            Object[] rowData = {date,time,sample_No,quality,bloom,bloomCount,seria,C,Si,Mn,P,S,Cr,Ni,Mo,Cu,Al,As,V,W,Ti};
             output_table_inner.addRow(rowData);
         });
     }
@@ -78,7 +75,7 @@ public class Controller {
         sampleList.addAll(pullData());
         sampleList.addAll(collectedData);
         refreshData(sampleList);
-        print();
+        print(pullData());
     }
 
     public void refreshData(List<MSample> sample) {
@@ -88,5 +85,95 @@ public class Controller {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+    }
+    public void printOutputTable() {
+        List<MSample> sampleList = new ArrayList<>();
+        String[] data = new String[21];
+        try
+        {
+            for (int i = 0; i < output_table.getRowCount(); i++)
+            {
+                for (int j = 0; j < output_table.getColumnCount(); j++) {
+                    data[j] = String.valueOf(output_table_inner.getValueAt(i, j));
+                    if(data[j]=="null") data[j]=null;
+                }
+                MSample sample = MSample.builder()
+                        .date(data[0])
+                        .time(data[1])
+                        .sampleNo(data[2])
+                        .quality(data[3])
+                        .bloom(data[4])
+                        .codes(data[5])
+                        .seria(data[6])
+                        .C(data[7])
+                        .Si(data[8])
+                        .Mn(data[9])
+                        .P(data[10])
+                        .S(data[11])
+                        .Cr(data[12])
+                        .Ni(data[13])
+                        .Mo(data[14])
+                        .Cu(data[15])
+                        .Al(data[16])
+                        .As(data[17])
+                        .V(data[18])
+                        .W(data[19])
+                        .Ti(data[20])
+                        .build();
+                sampleList.add(sample);
+            }
+            refreshData(sampleList);
+            print(pullData());
+        }catch (IllegalArgumentException e)
+        {
+            JOptionPane.showMessageDialog(null, "Заповніть поля коректно");
+            print(pullData());
+        }
+    }
+    public void search(String name)
+    {
+        print(searchByName(name,pullData()));
+    }
+    public void delete()
+    {
+        int selectedRow[] = output_table.getSelectedRows();
+        List<MSample> deleteList = new ArrayList<>();
+        List<MSample> sampleList = new ArrayList<>(pullData());
+        String[] data = new String[21];
+        for(int i = 0; i < selectedRow.length; i++) {
+            for(int j = 0; j < output_table.getColumnCount(); j++)
+            {
+                data[j] = String.valueOf(output_table_inner.getValueAt(selectedRow[i], j));
+                if(data[j]=="null") data[j]=null;
+            }
+            output_table_inner.removeRow(selectedRow[i]);
+            MSample sample = MSample.builder()
+                    .date(data[0])
+                    .time(data[1])
+                    .sampleNo(data[2])
+                    .quality(data[3])
+                    .bloom(data[4])
+                    .codes(data[5])
+                    .seria(data[6])
+                    .C(data[7])
+                    .Si(data[8])
+                    .Mn(data[9])
+                    .P(data[10])
+                    .S(data[11])
+                    .Cr(data[12])
+                    .Ni(data[13])
+                    .Mo(data[14])
+                    .Cu(data[15])
+                    .Al(data[16])
+                    .As(data[17])
+                    .V(data[18])
+                    .W(data[19])
+                    .Ti(data[20])
+                    .build();
+            deleteList.add(sample);
+        }
+        sampleList.removeAll(deleteList);
+        refreshData(sampleList);
+
     }
 }
