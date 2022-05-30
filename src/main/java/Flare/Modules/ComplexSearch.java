@@ -1,8 +1,9 @@
 package Flare.Modules;
 
-import Flare.Controller;
 import Flare.MSample;
+import Flare.Program;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,4 +17,5 @@ public class ComplexSearch {
         }
         return result;
     }
+
 }

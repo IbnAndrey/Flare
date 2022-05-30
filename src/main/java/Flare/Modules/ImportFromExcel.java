@@ -140,7 +140,6 @@ public class ImportFromExcel {
                         .Mo(data[17])
                         .Cu(data[18])
                         .Al(data[19])
-                        .As(data[20])
                         .V(data[21])
                         .W(data[22])
                         .Ti(data[23])

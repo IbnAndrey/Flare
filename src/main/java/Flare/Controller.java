@@ -1,20 +1,21 @@
 package Flare;
 
+import Flare.Modules.Config;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import Flare.Modules.ImportFromExcel;
 
 import static Flare.Modules.ComplexSearch.searchByName;
 
 public class Controller {
-    private final String[] header = new String[]{"Дата","Время","Номер образца", "Марка стали", "Блюм", "Кол-во блюмов","Серия", "C","Si","Mn","P","S","Cr","Ni","Mo","Cu","Al","As","V","W","Ti"};
+    private final String[] header = new String[]{"Дата","Время","Номер образца", "Марка стали", "Блюм", "Кол-во блюмов","Серия", "C","Si","Mn","P","S","Cr","Ni","Mo","Cu","Al","V","W","Ti"};
     private JTable output_table;
     private DefaultTableModel output_table_inner = new DefaultTableModel(header, 0);
     private List<MSample> tableList = new ArrayList<>();
-    public boolean saveBlocker = false;
+    public Config config;
     public JTable createOutputTable() {
         print(pullData());
         output_table = new JTable(output_table_inner);
@@ -22,6 +23,10 @@ public class Controller {
         return output_table;
     }
 
+    public Controller()
+    {
+        getConfig();
+    }
     public void print(List<MSample> tableList) {
         output_table_inner.setRowCount(0);
         tableList.forEach(sample ->
@@ -43,14 +48,14 @@ public class Controller {
             String Mo = sample.getMo();
             String Cu = sample.getCu();
             String Al = sample.getAl();
-            String As = sample.getAs();
             String V = sample.getV();
             String W = sample.getW();
             String Ti = sample.getTi();
-            Object[] rowData = {date,time,sample_No,quality,bloom,bloomCount,seria,C,Si,Mn,P,S,Cr,Ni,Mo,Cu,Al,As,V,W,Ti};
+            Object[] rowData = {date,time,sample_No,quality,bloom,bloomCount,seria,C,Si,Mn,P,S,Cr,Ni,Mo,Cu,Al,V,W,Ti};
             output_table_inner.addRow(rowData);
         });
     }
+
     public List<MSample> pullData() {
         File f = new File("db.dat");
         if(!f.exists()){
@@ -115,10 +120,9 @@ public class Controller {
                         .Mo(data[14])
                         .Cu(data[15])
                         .Al(data[16])
-                        .As(data[17])
-                        .V(data[18])
-                        .W(data[19])
-                        .Ti(data[20])
+                        .V(data[17])
+                        .W(data[18])
+                        .Ti(data[19])
                         .build();
                 sampleList.add(sample);
             }
@@ -146,7 +150,7 @@ public class Controller {
                 data[j] = String.valueOf(output_table_inner.getValueAt(selectedRow[i], j));
                 if(data[j]=="null") data[j]=null;
             }
-            output_table_inner.removeRow(selectedRow[i]);
+
             MSample sample = MSample.builder()
                     .date(data[0])
                     .time(data[1])
@@ -165,15 +169,52 @@ public class Controller {
                     .Mo(data[14])
                     .Cu(data[15])
                     .Al(data[16])
-                    .As(data[17])
-                    .V(data[18])
-                    .W(data[19])
-                    .Ti(data[20])
+                    .V(data[17])
+                    .W(data[18])
+                    .Ti(data[19])
                     .build();
             deleteList.add(sample);
         }
+
         sampleList.removeAll(deleteList);
         refreshData(sampleList);
+        for(int i = 0; i < selectedRow.length; i++) {
+            output_table_inner.removeRow(selectedRow[selectedRow.length-1-i]);
+        }
 
+    }
+    public void getConfig()
+    {
+        File f = new File("config.cfg");
+        if(!f.exists()){
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try (ObjectInputStream fout = new ObjectInputStream(new FileInputStream("config.cfg"))) {
+            config = ((Config) fout.readObject());
+        } catch (Exception e) {
+            config = Config.builder()
+                    .dateCheckBox(false)
+                    .datePeriodCheckBox(false)
+                    .qualityCheckBox(false)
+                    .bloomCheckBox(false)
+                    .chemsButton(null)
+                    .seriaCheckBox(false)
+                    .build();
+        }
+    }
+    public void setConfig(Config config)
+    {
+
+        try (ObjectOutputStream fout = new ObjectOutputStream(new FileOutputStream("config.cfg"))) {
+            fout.writeObject(config);
+            fout.flush();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }
