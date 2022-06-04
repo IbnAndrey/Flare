@@ -94,16 +94,27 @@ public class ImportFromExcel {
                     else data[i-1] = String.valueOf(cell.getNumericCellValue());
                 }
                 cell = sheet.getRow(row.getRowNum()).getCell(11);
-                if(cell != null)
-                data[9] = cell.getStringCellValue();
+                if(cell != null) {
+                    if(cell.getCellTypeEnum().name()== "STRING")
+                    data[9] = cell.getStringCellValue();
+                    else
+                    {
+                        data[9] = dt.format(cell.getDateCellValue());
+                        String splitter[] = data[9].split("\\.");
+                        data[9]=Integer.parseInt(splitter[0])+"*"+Integer.parseInt(splitter[1]);
+                    }
+                }
                 else data[9] = null;
 
                 for(int i = 13; i<=26;++i)
                 {
                     cell = sheet.getRow(row.getRowNum()).getCell(i);
                     if(cell==null) data[i-3] = null;
-                    else if(cell.getCellTypeEnum().name()== "STRING")
-                    data[i-3] = cell.getStringCellValue();  //
+                    else if(cell.getCellTypeEnum().name()== "STRING") {
+                        data[i-3] = cell.getStringCellValue();  //
+                        data[i-3]=data[i-3].replace(",", ".");
+                        data[i-3]=data[i-3].replace("<", "");
+                    }
                     else data[i-3] = String.valueOf(cell.getNumericCellValue());
                 }
                 System.out.println("");
