@@ -114,6 +114,7 @@ public class ImportFromExcel {
                         data[i-3] = cell.getStringCellValue();  //
                         data[i-3]=data[i-3].replace(",", ".");
                         data[i-3]=data[i-3].replace("<", "");
+                        data[i-3]=data[i-3].replace(">", "");
                     }
                     else data[i-3] = String.valueOf(cell.getNumericCellValue());
                 }

@@ -20,6 +20,7 @@ public class Controller {
     private DefaultTableModel input_table_inner = new DefaultTableModel(header, 3);
     private List<MSample> tableList = new ArrayList<>();
     private ComplexSearch searcher = new ComplexSearch();
+    private MSample bufferSample;
     public Config config;
 
 
@@ -283,6 +284,50 @@ public class Controller {
         }
 
     }
+    public void copySelectedInto(String target)
+    {
+        int selectedRow[] = output_table.getSelectedRows();
+        List<MSample> addList = new ArrayList<>();
+        List<MSample> sampleList = new ArrayList<>(pullData(target));
+        String[] data = new String[20];
+        for(int i = 0; i < selectedRow.length; i++) {
+            for(int j = 0; j < output_table.getColumnCount(); j++)
+            {
+                data[j] = String.valueOf(output_table_inner.getValueAt(selectedRow[i], j));
+                if(data[j]=="null") data[j]=null;
+            }
+
+            MSample sample = MSample.builder()
+                    .date(data[0])
+                    .time(data[1])
+                    .sampleNo(data[2])
+                    .quality(data[3])
+                    .bloom(data[4])
+                    .codes(data[5])
+                    .seria(data[6])
+                    .C(data[7])
+                    .Si(data[8])
+                    .Mn(data[9])
+                    .P(data[10])
+                    .S(data[11])
+                    .Cr(data[12])
+                    .Ni(data[13])
+                    .Mo(data[14])
+                    .Cu(data[15])
+                    .Al(data[16])
+                    .V(data[17])
+                    .W(data[18])
+                    .Ti(data[19])
+                    .build();
+           addList.add(sample);
+        }
+
+        sampleList.addAll(addList);
+        refreshData(sampleList,target);
+
+
+    }
+
 
     public void startAutosearch()
     {
@@ -315,9 +360,18 @@ public class Controller {
                 .W(data[18])
                 .Ti(data[19])
                 .build();
+        bufferSample=sample;
         print(searcher.autosearch(sample,pullData("MSamples.dat"),config));
     }
-
+    public void startStepsearch(String firstDate, String secondDate)
+    {
+        print(searcher.stepsearch(bufferSample,pullData("MSamples.dat"),config,firstDate,secondDate));
+    }
+    public void stopStepsearch()
+    {
+        searcher.setStepNo(1);
+        searcher.setIterationNo(1);
+    }
     public void getConfig()
     {
         File f = new File("config.cfg");

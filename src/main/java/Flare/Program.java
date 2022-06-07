@@ -41,13 +41,24 @@ public class Program {
         Icon searchNextIcon = new ImageIcon("icons/arrow.png");
         Icon searchStopIcon = new ImageIcon("icons/cross.png");
         Icon autoSearchParamsIcon = new ImageIcon("icons/autosearchparams.png");
+        Icon searchInfoIcon = new ImageIcon("icons/info.png");
+        Icon changeStorageIcon = new ImageIcon("icons/clean.png");
+        Icon bookmarkIcon = new ImageIcon("icons/bookmarks.png");
+        Icon addBookmarkIcon = new ImageIcon("icons/addbookmark.png");
+        Icon deleteBookmarkIcon = new ImageIcon("icons/deletebookmark.png");
         JButton searchButton = new JButton();
         JButton autoSearchButton = new JButton();
         JButton searchNextButton = new JButton();
         JButton searchStopButton = new JButton();
         JButton searchParamsButton = new JButton();
+        JButton searchInfoButton = new JButton();
+        JButton changeStorageButton = new JButton();
+        JButton addToBookmarkButton = new JButton();
+        JButton deleteBookmarkButton = new JButton();
+        JButton bookmarkButton = new JButton();
 
         JLabel autoSearchSubscr = new JLabel("Автопоиск");
+        JLabel tableOpsSubscr = new JLabel("Таблица");
         JLabel manualSearchSubscr = new JLabel("Ручной поиск");
         JCheckBox samplesPerStepCheckBox = new JCheckBox("обр. за шаг");
         samplesPerStepCheckBox.setSelected(controller.config.isSamplesPerStepCheckBox());
@@ -57,17 +68,25 @@ public class Program {
         autoSearchSubscr.setForeground(Color.GRAY);
         manualSearchSubscr.setFont(new Font("Arial",Font.PLAIN,14));
         manualSearchSubscr.setForeground(Color.GRAY);
+        tableOpsSubscr.setFont(new Font("Arial",Font.PLAIN,14));
+        tableOpsSubscr.setForeground(Color.GRAY);
         searchButton.setIcon(searchIcon);
         autoSearchButton.setIcon(autoSearchIcon);
         searchNextButton.setIcon(searchNextIcon);
         searchStopButton.setIcon(searchStopIcon);
         searchParamsButton.setIcon(autoSearchParamsIcon);
-        searchButton.setToolTipText("Поиск образцов по номеру");
+        autoSearchButton.setIcon(autoSearchIcon);
+        searchInfoButton.setIcon(searchInfoIcon);
+        changeStorageButton.setIcon(changeStorageIcon);
+        bookmarkButton.setIcon(bookmarkIcon);
+        addToBookmarkButton.setIcon(addBookmarkIcon);
+        deleteBookmarkButton.setIcon(deleteBookmarkIcon);
+        changeStorageButton.setToolTipText("Перекидывает образец в другое хранилище");
         JButton searchSettingsButton = new JButton();
         searchSettingsButton.setIcon(settingsIcon);
         searchSettingsButton.setToolTipText("Расширенные параметры поиска");
         JTextField searchBox = new JTextField();
-        JTextField stepBox = new JTextField();
+        JTextField stepBox = new JTextField(controller.config.getSamplesPerStep());
         JButton refreshButton = new JButton();
         JButton changeSampleTypeButton = new JButton();
         changeSampleTypeButton.setIcon(MrIcon);
@@ -83,6 +102,7 @@ public class Program {
         searchBox.setBounds(1105, 40, 136, 30);
         autoSearchSubscr.setBounds(1140, 150, 150, 30);
         manualSearchSubscr.setBounds(1130, 0, 150, 30);
+        tableOpsSubscr.setBounds(1140, 330, 150, 30);
         autoSearchButton.setBounds(1105, 190, 30, 30);
         searchButton.setBounds(1105, 70, 30, 30);
         searchSettingsButton.setBounds(1140, 70, 30, 30);
@@ -92,11 +112,17 @@ public class Program {
         searchNextButton.setBounds(1140, 190, 60, 30);
         searchStopButton.setBounds(1205, 190, 30, 30);
         searchParamsButton.setBounds(1105, 225, 30, 30);
+        changeStorageButton.setBounds(1210, 370, 30, 30);
+        bookmarkButton.setBounds(1105, 370, 30, 30);
+        addToBookmarkButton.setBounds(1140, 370, 30, 30);
+        deleteBookmarkButton.setBounds(1175, 370, 30, 30);
         samplesPerStepCheckBox.setBounds(1100, 275, 100, 30);
         stepBox.setBounds(1210, 275, 20, 30);
+        searchInfoButton.setBounds(1205, 225, 30, 30);
         autoSearchButton.setEnabled(false);
         searchNextButton.setEnabled(false);
         searchStopButton.setEnabled(false);
+        searchInfoButton.setEnabled(false);
         frame.setSize(1265, 720);
         frame.setResizable(false);
         frame.getContentPane().setLayout(null);
@@ -113,11 +139,17 @@ public class Program {
         frame.add(searchBox);
         frame.add(autoSearchSubscr);
         frame.add(manualSearchSubscr);
+        frame.add(tableOpsSubscr);
         frame.add(autoSearchButton);
         frame.add(searchNextButton);
         frame.add(searchStopButton);
         frame.add(searchParamsButton);
+        frame.add(searchInfoButton);
+        frame.add(changeStorageButton);
         frame.add(samplesPerStepCheckBox);
+        frame.add(bookmarkButton);
+        frame.add(addToBookmarkButton);
+        frame.add(deleteBookmarkButton);
         frame.add(stepBox);
         frame.setVisible(true);
 
@@ -338,8 +370,12 @@ public class Program {
         JLabel chemSubscr1 = new JLabel(chemSubscr.getText());
         JLabel deviationLineSubscr1 = new JLabel(deviationLineSubscr.getText());
         JLabel stepSubscr = new JLabel("шаг");
+        JLabel dateSubscr1 = new JLabel("по");
+        JCheckBox dateCheckBox1 = new JCheckBox("В пределах даты");
+        dateCheckBox1.setSelected(controller.config.isDateCheckBox1());
         deviationLineSubscr1.setFont(new Font("Arial",Font.PLAIN,14));
         stepSubscr.setFont(new Font("Arial",Font.PLAIN,14));
+        dateSubscr1.setFont(new Font("Arial",Font.PLAIN,14));
         JTextField CDevBox1 = new JTextField(controller.config.getCDevAuto());
         JTextField SiDevBox1 = new JTextField(controller.config.getSiDevAuto());
         JTextField MnDevBox1 = new JTextField(controller.config.getMnDevAuto());
@@ -367,10 +403,13 @@ public class Program {
         JTextField WStepBox = new JTextField(controller.config.getWStepAuto());
         JTextField TiStepBox = new JTextField(controller.config.getTiStepAuto());
 
+        JTextField firstDateBox1 = new JTextField();
+        JTextField secondDateBox1 = new JTextField();
+
         chemSubscr1.setBounds(43, 10, 900, 20);
         deviationLineSubscr1.setBounds(750, 30, 100, 20);
         stepSubscr.setBounds(750, 73, 900, 20);
-        paramsframe.setSize(850, 150);
+        paramsframe.setSize(850, 200);
         CDevBox1.setBounds(20,30 , 50, 20);
         SiDevBox1.setBounds(75, 30, 50, 20);
         MnDevBox1.setBounds(130, 30, 50, 20);
@@ -397,7 +436,10 @@ public class Program {
         VStepBox.setBounds(570, 70, 50, 20);
         WStepBox.setBounds(625, 70, 50, 20);
         TiStepBox.setBounds(680, 70, 50, 20);
-
+        firstDateBox1.setBounds(20,120,150,30);
+        secondDateBox1.setBounds(200,120,150,30);
+        dateSubscr1.setBounds(175,120,20,30);
+        dateCheckBox1.setBounds(360,120,200,30);
 
         paramsframe.add(chemSubscr1);
         paramsframe.add(deviationLineSubscr1);
@@ -431,9 +473,10 @@ public class Program {
         paramsframe.add(VStepBox);
         paramsframe.add(WStepBox);
         paramsframe.add(TiStepBox);
-
-
-
+        paramsframe.add(firstDateBox1);
+        paramsframe.add(secondDateBox1);
+        paramsframe.add(dateSubscr1);
+        paramsframe.add(dateCheckBox1);
 
 
         if(dateCheckBox.isSelected()) {
@@ -614,9 +657,30 @@ public class Program {
         if(controller.getOutput_table().getSelectedRow()!=-1)
         {
         controller.startAutosearch();
+        searchInfoButton.setEnabled(true);
+        if(!controller.getSearcher().isFindSuccess())searchNextButton.setEnabled(true);
         }
         else JOptionPane.showMessageDialog(frame,"Выберите разрывной образец","Ошибка",JOptionPane.ERROR_MESSAGE);
+        });
 
+        searchInfoButton.addActionListener(actionListener ->
+        {
+            JOptionPane.showMessageDialog(frame,controller.getSearcher().getReport(),"Завершено",JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        searchNextButton.addActionListener(actionListener ->
+        {
+            controller.config.setSamplesPerStep(stepBox.getText());
+            controller.config.setSamplesPerStepCheckBox(samplesPerStepCheckBox.isSelected());
+            controller.config.setSamplesPerStep(stepBox.getText());
+            controller.startStepsearch(firstDateBox1.getText(),secondDateBox1.getText());
+            searchStopButton.setEnabled(true);
+        });
+        searchStopButton.addActionListener(actionListener ->
+        {
+            controller.stopStepsearch();
+            searchStopButton.setEnabled(false);
+            controller.print(controller.pullData("MSamples.dat"));
         });
 
         OpenFile.addActionListener(actionListener ->
@@ -667,6 +731,8 @@ public class Program {
         {
 
             SaveTableButton.setEnabled(true);
+            searchInfoButton.setEnabled(false);
+            searchNextButton.setEnabled(false);
             searchBox.setText(null);
             if(changeSampleTypeButton.getIcon().equals(MrIcon)) controller.print(controller.pullData("MSamples.dat"));
             else controller.print(controller.pullData("RSamples.dat"));
@@ -686,6 +752,8 @@ public class Program {
                 changeSampleTypeButton.setToolTipText("Для отображения выбраны маркировочные образцы. Кликните, чтобы отображать разрывные");
                 controller.print(controller.pullData("MSamples.dat"));
                 autoSearchButton.setEnabled(false);
+                searchNextButton.setEnabled(false);
+                searchInfoButton.setEnabled(false);
             }
         });
         deleteButton.addActionListener(actionListener ->
@@ -706,6 +774,31 @@ public class Program {
         searchParamsButton.addActionListener(actionListener ->
         {
             paramsframe.setVisible(true);
+        });
+        bookmarkButton.addActionListener(actionListener ->
+        {
+            controller.print(controller.pullData("Bookmarks.dat"));
+        });
+        deleteBookmarkButton.addActionListener(actionListener ->
+        {
+            controller.delete("Bookmarks.dat");
+        });
+        addToBookmarkButton.addActionListener(actionListener ->
+        {
+            controller.copySelectedInto("Bookmarks.dat");
+        });
+        changeStorageButton.addActionListener(actionListener ->
+        {
+            if(changeSampleTypeButton.getIcon().equals(MrIcon))
+            {
+                controller.copySelectedInto("RSamples.dat");
+                controller.delete("MSamples.dat");
+            }
+            else
+            {
+                controller.copySelectedInto("MSamples.dat");
+                controller.delete("RSamples.dat");
+            }
         });
 
         paramsframe.addWindowListener(new WindowAdapter() {
@@ -736,6 +829,7 @@ public class Program {
                 controller.config.setVStepAuto(VStepBox.getText());
                 controller.config.setWStepAuto(WStepBox.getText());
                 controller.config.setTiStepAuto(TiStepBox.getText());
+                controller.config.setDateCheckBox1(dateCheckBox1.isSelected());
             }
         });
 
@@ -789,6 +883,7 @@ public class Program {
                         .TiStepAuto(TiStepBox.getText())
                         .samplesPerStep(stepBox.getText())
                         .samplesPerStepCheckBox(samplesPerStepCheckBox.isSelected())
+                        .dateCheckBox1(dateCheckBox1.isSelected())
                         .build();
                 controller.setConfig(controller.config);
             }

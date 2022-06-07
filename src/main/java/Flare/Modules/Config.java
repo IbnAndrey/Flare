@@ -11,7 +11,7 @@ import lombok.*;
 public class Config implements Serializable {
 
 
-     private boolean dateCheckBox,datePeriodCheckBox,qualityCheckBox,bloomCheckBox,seriaCheckBox,samplesPerStepCheckBox;
+     private boolean dateCheckBox,dateCheckBox1,datePeriodCheckBox,qualityCheckBox,bloomCheckBox,seriaCheckBox,samplesPerStepCheckBox;
      private Color chemsButton;
      String CDev,SiDev,MnDev,PDev,SDev,CrDev,NiDev,MoDev,CuDev,AlDev,VDev,WDev,TiDev;
      String CDevAuto,SiDevAuto,MnDevAuto,PDevAuto,SDevAuto,CrDevAuto,NiDevAuto,MoDevAuto,CuDevAuto,AlDevAuto,VDevAuto,WDevAuto,TiDevAuto;
