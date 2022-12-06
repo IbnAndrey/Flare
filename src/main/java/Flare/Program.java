@@ -15,15 +15,15 @@ import java.io.File;
 import java.io.IOException;
 
 
-
+//TODO:Проверка переходного блюма
 
 public class Program {
 
 
 
     public static void main(String[] args) {
-
-        JFrame frame = new JFrame("Flare");//TODO: Кнопку переноса образца из одного хранилища в другое
+        String versionInfo = "v. 1.1";
+        JFrame frame = new JFrame("Flare");
         JFileChooser fileChooser = new JFileChooser();
         Controller controller = new Controller();
         ComplexSearch complexSearcher = new ComplexSearch();
@@ -31,6 +31,7 @@ public class Program {
         JButton SaveTableButton = new JButton("Сохранить");
         JButton deleteButton = new JButton("Удалить");
         JButton addButton = new JButton("Добавить");
+        JButton screenshotButton = new JButton("Скриншот");
         deleteButton.setToolTipText("Удаляет выделенный елемент(-ы)");
         Icon searchIcon = new ImageIcon("icons/search.png");
         Icon settingsIcon = new ImageIcon("icons/settings.png");
@@ -56,7 +57,7 @@ public class Program {
         JButton addToBookmarkButton = new JButton();
         JButton deleteBookmarkButton = new JButton();
         JButton bookmarkButton = new JButton();
-
+        JLabel versionInfoSubscr = new JLabel(versionInfo);
         JLabel autoSearchSubscr = new JLabel("Автопоиск");
         JLabel tableOpsSubscr = new JLabel("Таблица");
         JLabel manualSearchSubscr = new JLabel("Ручной поиск");
@@ -95,6 +96,7 @@ public class Program {
         refreshButton.setToolTipText("Заново вывести данные в таблицу");
         searchBox.setToolTipText("Введите номер образца для поиска");
         JScrollPane output = new JScrollPane(controller.createOutputTable());
+        versionInfoSubscr.setBounds(10, 650, 150, 30);
         output.setBounds(0, 0, 1100, 600);
         OpenFile.setBounds(325, 620, 150, 30);
         deleteButton.setBounds(525, 620, 150, 30);
@@ -108,6 +110,7 @@ public class Program {
         searchSettingsButton.setBounds(1140, 70, 30, 30);
         refreshButton.setBounds(1175, 70, 30, 30);
         addButton.setBounds(725, 620, 150, 30);
+
         changeSampleTypeButton.setBounds(1210, 70, 30, 30);
         searchNextButton.setBounds(1140, 190, 60, 30);
         searchStopButton.setBounds(1205, 190, 30, 30);
@@ -135,8 +138,10 @@ public class Program {
         frame.add(searchSettingsButton);
         frame.add(refreshButton);
         frame.add(addButton);
+
         frame.add(changeSampleTypeButton);
         frame.add(searchBox);
+        frame.add(versionInfoSubscr);
         frame.add(autoSearchSubscr);
         frame.add(manualSearchSubscr);
         frame.add(tableOpsSubscr);
@@ -161,11 +166,13 @@ public class Program {
         JScrollPane input = new JScrollPane(controller.createInputTable());
         addSampleButton.setIcon(saveIcon);
         addSampleButton.setToolTipText("Записать образец. Его принадлежность к разрывным или маркировочным определится автоматически.");
-        input.setBounds(0, 0, 1100, 39);
-        addSampleButton.setBounds(1120, 0, 40, 40);
-        addframe.setSize(1200, 100);
+        input.setBounds(20, 0, 1100, 100);
+        addSampleButton.setBounds(1140, 0, 40, 40);
+        screenshotButton.setBounds(20, 110, 150, 30);
+        addframe.setSize(1220, 400);
         addframe.add(input);
         addframe.add(addSampleButton);
+        addframe.add(screenshotButton);
 
         if(samplesPerStepCheckBox.isSelected()) {
             stepBox.setEnabled(true);
@@ -764,6 +771,16 @@ public class Program {
         addButton.addActionListener(actionListener ->
         {
             addframe.setVisible(true);
+        });
+       screenshotButton.addActionListener(actionListener ->
+        {
+            try {
+                controller.screenshotDataCapture();
+            }
+            catch (Exception e)
+            {
+                JOptionPane.showMessageDialog(frame,"Ошибка получения снимка экрана. Программа не смогла найти открытый Spark Analyser","Ошибка",JOptionPane.ERROR_MESSAGE);
+            }
         });
         addSampleButton.addActionListener(actionListener ->
         {

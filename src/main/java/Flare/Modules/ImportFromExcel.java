@@ -4,7 +4,6 @@ package Flare.Modules;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Iterator;
 
@@ -115,6 +114,7 @@ public class ImportFromExcel {
                         data[i-3]=data[i-3].replace(",", ".");
                         data[i-3]=data[i-3].replace("<", "");
                         data[i-3]=data[i-3].replace(">", "");
+                        data[i-3]=data[i-3].replace("~", "");
                     }
                     else data[i-3] = String.valueOf(cell.getNumericCellValue());
                 }

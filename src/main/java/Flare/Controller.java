@@ -6,13 +6,37 @@ import Flare.Modules.Config;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
-import java.util.ArrayList;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+
+import Flare.Modules.Preprocessor;
 import lombok.*;
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 
+
+class SortByDate implements Comparator<MSample>
+{
+    SimpleDateFormat dt = new SimpleDateFormat("dd.MM.yyyy");
+    Date sample1Date;
+    Date sample2Date;
+    public int compare(MSample a, MSample b)
+    {
+        try {
+            sample1Date = dt.parse(a.getDate());
+            sample2Date = dt.parse(b.getDate());
+        } catch (ParseException e){}
+        int difference = sample2Date.compareTo(sample1Date);
+        return difference;
+    }
+}
 @Getter
-
-
 public class Controller {
     private final String[] header = new String[]{"Дата","Время","Номер образца", "Марка стали", "Блюм", "Кол-во блюмов","Серия", "C","Si","Mn","P","S","Cr","Ni","Mo","Cu","Al","V","W","Ti"};
     private JTable output_table,input_table;
@@ -71,6 +95,8 @@ public class Controller {
         });
     }
 
+
+
     public List<MSample> pullData(String target) {
         File f = new File(target);
 
@@ -93,11 +119,19 @@ public class Controller {
     public void pushData(List<MSample> collectedData){
         List<MSample> sampleMList = new ArrayList<>();
         List<MSample> sampleRList = new ArrayList<>();
+        List<MSample> oldSampleMList = pullData("MSamples.dat");
+        List<MSample> oldSampleRList = pullData("RSamples.dat");
+        boolean found = false;
         for (int i = 0; i<collectedData.size();++i)
         {
             if(collectedData.get(i).getSampleNo().contains("M"))
             {
-                sampleMList.add(collectedData.get(i));
+                for(int j = 0; j<oldSampleMList.size();++j)
+                {
+                    if(collectedData.get(i).getSampleNo().compareTo(oldSampleMList.get(j).getSampleNo())==0) found = true;
+                }
+                if(found==false)sampleMList.add(collectedData.get(i));
+                found = false;
             }
             else
             {
@@ -106,13 +140,30 @@ public class Controller {
                         collectedData.get(i).getSampleNo().contains("T")||
                         collectedData.get(i).getSampleNo().contains("C")||
                         collectedData.get(i).getSampleNo().contains("U")
-                )sampleRList.add(collectedData.get(i));
-                else sampleMList.add(collectedData.get(i));
+                ) {
+                    for(int j = 0; j<oldSampleRList.size();++j)
+                    {
+                        if(collectedData.get(i).getSampleNo().compareTo(oldSampleRList.get(j).getSampleNo())==0) found = true;
+                    }
+                    if(found==false)sampleRList.add(collectedData.get(i));
+                    found = false;
+                }
+                else
+                {
+                    for(int j = 0; j<oldSampleMList.size();++j)
+                    {
+                        if(collectedData.get(i).getSampleNo().compareTo(oldSampleMList.get(j).getSampleNo())==0) found = true;
+                    }
+                    if(found==false)sampleMList.add(collectedData.get(i));
+                    found = false;
+                }
             }
         }
 
-        sampleMList.addAll(pullData("MSamples.dat"));
-        sampleRList.addAll(pullData("RSamples.dat"));
+        sampleMList.addAll(oldSampleMList);
+        sampleRList.addAll(oldSampleRList);
+        Collections.sort(sampleMList,new SortByDate());
+        Collections.sort(sampleRList,new SortByDate());
         refreshData(sampleMList,"MSamples.dat");
         refreshData(sampleRList,"RSamples.dat");
     }
@@ -159,6 +210,53 @@ public class Controller {
         pushData(sampleList);
 
     }
+
+    public void screenshotDataCapture() throws Exception
+    {
+        /*final Rectangle rect = new Rectangle(0, 0, 0, 0); //needs to be final or effectively final for lambda
+        WindowUtils.getAllWindows(true).forEach(desktopWindow -> {
+            if (desktopWindow.getTitle().equals("Flare")) {
+                rect.setRect(desktopWindow.getLocAndSize());
+            }
+        });
+            //Thread.sleep(3000);
+            BufferedImage image = new Robot().createScreenCapture(rect);
+            ImageIO.write(image, "PNG", new File("screenshot.png"));*/
+        Preprocessor preprocessor = new Preprocessor();
+        List<String> sampleList = preprocessor.doTesseract();
+        input_table_inner.setRowCount(0);
+        SimpleDateFormat dt = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat tm = new SimpleDateFormat("HH:mm:ss");
+        sampleList.forEach(sample ->
+        {
+            List<String>sampleElems= Arrays.stream(sample.split(" ")).collect(Collectors.toList());
+
+            String date = dt.format(Calendar.getInstance().getTime());
+            String time = tm.format(Calendar.getInstance().getTime());
+            String sample_No = "";
+            String quality = "";
+            String bloom = "";
+            String bloomCount = "";
+            String seria = "";
+            String C = sampleElems.get(0);
+            String Si = sampleElems.get(1);
+            String Mn = sampleElems.get(2);
+            String P = sampleElems.get(3);
+            String S = sampleElems.get(4);
+            String Cr = sampleElems.get(5);
+            String Ni = sampleElems.get(6);
+            String Mo = sampleElems.get(7);
+            String Cu = sampleElems.get(8);
+            String Al = sampleElems.get(9);
+            String V = sampleElems.get(10);
+            String W = sampleElems.get(11);
+            String Ti = sampleElems.get(12);
+            Object[] rowData = {date,time,sample_No,quality,bloom,bloomCount,seria,C,Si,Mn,P,S,Cr,Ni,Mo,Cu,Al,V,W,Ti};
+            input_table_inner.addRow(rowData);
+        });
+
+    }
+
     public void printOutputTable(String target) {
         List<MSample> sampleList = new ArrayList<>();
         String[] data = new String[20];

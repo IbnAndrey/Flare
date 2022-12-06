@@ -264,7 +264,7 @@ public class ComplexSearch {
         {
            searchList = searchByDate(firstDate,secondDate,searchList);
         }
-        for(stepNo=stepNo; bufferList.size()<Integer.parseInt(config.getSamplesPerStep())*iterationNo||stepNo<1000;++stepNo) {
+        for(stepNo=stepNo; bufferList.size()<Integer.parseInt(config.getSamplesPerStep())*iterationNo||stepNo>1000;++stepNo) {
 
             bufferConfig = Config.builder()
                     .CDev(String.valueOf(Double.parseDouble(config.getCDevAuto()) +Double.parseDouble(config.getCStepAuto())*(stepNo)))
