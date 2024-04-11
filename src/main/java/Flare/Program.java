@@ -4,7 +4,10 @@ import Flare.Modules.Config;
 import Flare.Modules.ImportFromExcel;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicButtonListener;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -15,11 +18,9 @@ import java.io.File;
 import java.io.IOException;
 
 
-//TODO:Проверка переходного блюма
+//TODO:Проверка переходного блюма. Не работает поиск по дате в маркировках
 
 public class Program {
-
-
 
     public static void main(String[] args) {
         String versionInfo = "v. 1.1";
@@ -31,8 +32,10 @@ public class Program {
         JButton SaveTableButton = new JButton("Сохранить");
         JButton deleteButton = new JButton("Удалить");
         JButton addButton = new JButton("Добавить");
-        JButton screenshotButton = new JButton("Скриншот");
-        deleteButton.setToolTipText("Удаляет выделенный елемент(-ы)");
+
+        JButton clearAddingQueueButton = new JButton("Удалить рядок");
+        JButton insertAddingQueueButton = new JButton("Добавить рядок");
+        deleteButton.setToolTipText("Удаляет выделенный элемент(-ы)");
         Icon searchIcon = new ImageIcon("icons/search.png");
         Icon settingsIcon = new ImageIcon("icons/settings.png");
         Icon refreshIcon = new ImageIcon("icons/refresh.png");
@@ -159,7 +162,10 @@ public class Program {
         frame.setVisible(true);
 
 
-        JDialog addframe = new JDialog(frame,"Ввод образца",true);
+        JDialog addframe = new JDialog(frame,"Очередь на добавление",true);
+
+        JButton screenshotButton = new JButton("Скриншот");
+
         JButton addSampleButton = new JButton();
         Icon saveIcon = new ImageIcon("icons/save.png");
         addframe.getContentPane().setLayout(null);
@@ -168,11 +174,16 @@ public class Program {
         addSampleButton.setToolTipText("Записать образец. Его принадлежность к разрывным или маркировочным определится автоматически.");
         input.setBounds(20, 0, 1100, 100);
         addSampleButton.setBounds(1140, 0, 40, 40);
+        screenshotButton.setToolTipText("После нажатия на данную кнопку разверните окно измерений. Flare запишет данные образца в таблицу выше, где вы сможете его отредактировать и сохранить в хранилище. Проверяйте правильность полученной программой информации");
         screenshotButton.setBounds(20, 110, 150, 30);
+        clearAddingQueueButton.setBounds(220, 110, 150, 30);
+        insertAddingQueueButton.setBounds(420, 110, 150, 30);
         addframe.setSize(1220, 400);
         addframe.add(input);
         addframe.add(addSampleButton);
         addframe.add(screenshotButton);
+        addframe.add(clearAddingQueueButton);
+        addframe.add(insertAddingQueueButton);
 
         if(samplesPerStepCheckBox.isSelected()) {
             stepBox.setEnabled(true);
@@ -182,11 +193,7 @@ public class Program {
             stepBox.setEnabled(false);
         }
 /*
-
-
             ОКНО РАСШИРЕННОГО ПОИСКА
-
-
  */
 
         JDialog Sframe = new JDialog(frame,"Расширенный поиск",true);
@@ -772,15 +779,38 @@ public class Program {
         {
             addframe.setVisible(true);
         });
+
+        WindowAdapter screenshotTrigger = new WindowAdapter() {
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+                screenshotButton.doClick();
+                try {
+                    controller.screenshotDataCapture();
+                    JOptionPane.showMessageDialog(addframe, "Снимок получен", "Успех", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(addframe, "Ошибка получения снимка экрана. Программа не смогла найти открытое окно измерений", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        };
        screenshotButton.addActionListener(actionListener ->
         {
-            try {
-                controller.screenshotDataCapture();
-            }
-            catch (Exception e)
-            {
-                JOptionPane.showMessageDialog(frame,"Ошибка получения снимка экрана. Программа не смогла найти открытый Spark Analyser","Ошибка",JOptionPane.ERROR_MESSAGE);
-            }
+                if(screenshotButton.getBackground().getGreen()!=255) {
+                    screenshotButton.setBackground(new Color(130, 255, 130));
+                    addframe.addWindowListener(screenshotTrigger);
+                }else {
+                    addframe.removeWindowListener(screenshotTrigger);
+                    screenshotButton.setBackground(null);
+                }
+        });
+
+        clearAddingQueueButton.addActionListener(actionListener ->
+        {
+                controller.deleteRowManually();
+        });
+        insertAddingQueueButton.addActionListener(actionListener ->
+        {
+                controller.addRowManually();
         });
         addSampleButton.addActionListener(actionListener ->
         {

@@ -2,23 +2,25 @@ package Flare;
 
 import Flare.Modules.ComplexSearch;
 import Flare.Modules.Config;
+import Flare.Modules.Preprocessor;
 
+import com.sun.jna.platform.*;
+import com.sun.jna.*;
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
+import lombok.*;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-
-import Flare.Modules.Preprocessor;
-import lombok.*;
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
 
 
 class SortByDate implements Comparator<MSample>
@@ -180,8 +182,9 @@ public class Controller {
     {
         List<MSample> sampleList = new ArrayList<>();
         String[] data = new String[20];
+        for (int i = 0; i < input_table.getRowCount(); i++) {
             for (int j = 0; j < input_table.getColumnCount(); j++) {
-                data[j] = String.valueOf(input_table_inner.getValueAt(0, j));
+                data[j] = String.valueOf(input_table_inner.getValueAt(i, j));
                 if (data[j] == "null") data[j] = null;
             }
             MSample sample = MSample.builder()
@@ -206,23 +209,45 @@ public class Controller {
                     .W(data[18])
                     .Ti(data[19])
                     .build();
-        sampleList.add(sample);
+            sampleList.add(sample);
+        }
         pushData(sampleList);
-
     }
-
+    public void addRowManually()
+    {
+        input_table_inner.setRowCount(input_table_inner.getRowCount()+1);
+    }
+    public void deleteRowManually()
+    {
+        int selectedRow[] = input_table.getSelectedRows();
+        for(int i = 0; i < selectedRow.length; i++) {
+            input_table_inner.removeRow(selectedRow[selectedRow.length-1-i]);
+        }
+    }
     public void screenshotDataCapture() throws Exception
     {
-        /*final Rectangle rect = new Rectangle(0, 0, 0, 0); //needs to be final or effectively final for lambda
-        WindowUtils.getAllWindows(true).forEach(desktopWindow -> {
-            if (desktopWindow.getTitle().equals("Flare")) {
+        Thread.sleep(100);
+        final Rectangle rect = new Rectangle(0, 0, 0, 0); //needs to be final or effectively final for lambda
+
+        /*List<DesktopWindow> windows = WindowUtils.getAllWindows(true);
+        JOptionPane.showMessageDialog(null,"Получило список окон","Ошибка",JOptionPane.INFORMATION_MESSAGE); //дебаг
+        for (int i = 0; i<windows.size();i++) {
+            if (windows.get(i).getTitle().equals("Flare")) {//"Окно Измерений - Элементы: Концентрации"
+                JOptionPane.showMessageDialog(null,"Нашло нужное окно","Ошибка",JOptionPane.INFORMATION_MESSAGE); //дебаг
+                rect.setRect(windows.get(i).getLocAndSize());
+                JOptionPane.showMessageDialog(null,"Получило его размеры","Ошибка",JOptionPane.INFORMATION_MESSAGE); //дебаг
+            }
+        }*/
+        WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null,"Ножницы");
+       /*WindowUtils.getAllWindows(true).forEach(desktopWindow -> {
+            if (desktopWindow.getTitle().equals("Окно Измерений - Элементы: Концентрации")) {//"Окно Измерений - Элементы: Концентрации"
                 rect.setRect(desktopWindow.getLocAndSize());
             }
-        });
-            //Thread.sleep(3000);
+        });*/
+            rect.setRect(WindowUtils.getWindowLocationAndSize(hwnd));
             BufferedImage image = new Robot().createScreenCapture(rect);
-            ImageIO.write(image, "PNG", new File("screenshot.png"));*/
-        Preprocessor preprocessor = new Preprocessor();
+            ImageIO.write(image, "PNG", new File("screenshot.png"));//*/
+        /*Preprocessor preprocessor = new Preprocessor();
         List<String> sampleList = preprocessor.doTesseract();
         input_table_inner.setRowCount(0);
         SimpleDateFormat dt = new SimpleDateFormat("dd.MM.yyyy");
@@ -254,7 +279,7 @@ public class Controller {
             Object[] rowData = {date,time,sample_No,quality,bloom,bloomCount,seria,C,Si,Mn,P,S,Cr,Ni,Mo,Cu,Al,V,W,Ti};
             input_table_inner.addRow(rowData);
         });
-
+*/
     }
 
     public void printOutputTable(String target) {
